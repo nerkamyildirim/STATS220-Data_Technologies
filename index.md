@@ -1,10 +1,17 @@
 # Joey's got an assignment!
 
-My reasoning behind creating this meme was:
+## Here's a quick behind the scenes:
+
+1. My reasoning behind creating this meme was:
 * I am a big _Friends_ fan (specifically Joey)
 * __Procrastination__ is my lifelong struggle.
 * Why not?
 
+2. I tried to keep my creative spirit alive by using a different function that was not taught in the lectures.
+3. This meme is original in the sense that the content and the design is by me. However, I can't say I wasn't influenced by other similar memes that
+using the same photos. (You can find a similar one ![here]("https://i.kym-cdn.com/photos/images/original/001/697/668/738.jpg"))
+
+### Here's the code needed to create __"Joey's got an assignment" meme__
 
 ```{r}
 library(magick)
