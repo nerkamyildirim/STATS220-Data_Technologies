@@ -1,5 +1,11 @@
 # Joey's got an assignment!
 
+My reasoning behind creating this meme was:
+* I am a big _Friends_ fan (specifically Joey)
+* __Procrastination__ is my lifelong struggle.
+* Why not?
+
+
 ```{r}
 library(magick)
 
