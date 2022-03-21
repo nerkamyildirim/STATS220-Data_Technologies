@@ -67,3 +67,5 @@ meme <- c(happy_vector, shocked_vector, dead_vector) %>%
       image_append(stack = TRUE) %>% image_write("my_meme.png")
       
 ```
+### And that should give you
+![Joey's got an Assignment](my_meme.png)
