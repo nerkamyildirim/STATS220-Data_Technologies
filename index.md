@@ -3,9 +3,9 @@
 ## Here's a quick behind the scenes:
 
 1. My reasoning behind creating this meme was:
-* I am a big _Friends_ fan (specifically Joey)
+* I am a big _Friends_ fan (specifically Joey).
 * __Procrastination__ is my lifelong struggle.
-* Why not?
+* Between you and me, I kind of have to.
 
 2. I tried to keep my creative spirit alive by using a different function that was not taught in the lectures.
 3. This meme is original in the sense that the content and the design is by me. However, I can't say I wasn't influenced by other similar memes that
