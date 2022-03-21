@@ -9,7 +9,7 @@
 
 2. I tried to keep my creative spirit alive by using a different function that was not taught in the lectures.
 3. This meme is original in the sense that the content and the design is by me. However, I can't say I wasn't influenced by other similar memes that
-using the same photos. (You can find a similar one ![here]("https://i.kym-cdn.com/photos/images/original/001/697/668/738.jpg"))
+using the same photos. (You can find a similar one [here]("https://www.google.com/url?sa=i&url=https%3A%2F%2Fknowyourmeme.com%2Fphotos%2F1697668-joeys-delayed-reaction&psig=AOvVaw0F5TBXe5XyL8BNpX25QYzm&ust=1647921932042000&source=images&cd=vfe&ved=0CAsQjRxqFwoTCNDLtOqp1vYCFQAAAAAdAAAAABAR"))
 
 ### Here's the code needed to create __"Joey's got an assignment" meme__
 
