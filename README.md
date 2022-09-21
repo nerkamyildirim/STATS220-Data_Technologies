@@ -1,9 +1,4 @@
-# stats220
-## STATS220 - Data Technologies works repository
+# STATS220
 
-![welcome_image](repo_image2.png)  
+Here's a collection of the work I have done in STATS220 - Data Technologies paper at University of Auckland
 
-Welcome to my **STATS220 - Data Technologies** repo where you can find the awesome work we do during the course of the paper!
-
-
-Please visit [2rocksand20rolls](https://neverkam.github.io/stats220/) to check out my incredible STATS220 work!
