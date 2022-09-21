@@ -1,0 +1,142 @@
+---
+title: "Assignment 3"
+subtitle: "STATS 220 Semester One 2022"
+author: "Nev Erkam Yildirim"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, error = FALSE)
+library(tidyverse)
+library(jsonlite)
+library(RSQLite)
+db_connection <- dbConnect(SQLite(), "boardgamegeek.sqlite")
+```
+
+## Introduction
+
+- Since my childhood and through my adolescence, I have always been a big fan of Harry Potter book and movie series and, therefore, have decided to choose the word **Harry Potter** in my book search through [Google Books API](https://books.google.com/) and [board game geek website](https://boardgamegeek.com/).
+
+- Of course, at first glance, I am expecting both the book and the game to have exactly the same characters, the same features for those characters, and both to follow a similar plot line. The difference might be that the board game might equip some characters with some additional powers or might divert a little from the original plot line just to make a game out of it all.  
+
+## Book data
+
+### Sourcing data from the Google Books API
+
+```{r}
+query <- "https://www.googleapis.com/books/v1/volumes?q=intitle:%22harry+potter%22&startIndex=1&maxResults=40"
+
+response <- fromJSON(query, flatten = TRUE)
+
+book_data <- response$items
+
+book_data %>% 
+  select(volumeInfo.title, volumeInfo.publishedDate) %>%
+  knitr::kable()
+```
+
+### Creating a new data frame
+
+```{r}
+mini_data <- book_data %>%
+              select(volumeInfo.title,
+                     volumeInfo.pageCount,
+                     volumeInfo.publishedDate,
+                     volumeInfo.publisher,
+                     volumeInfo.averageRating,
+                     volumeInfo.description) %>%
+              rename(book_title = volumeInfo.title,
+                     page_count = volumeInfo.pageCount,
+                     published_date = volumeInfo.publishedDate,
+                     publisher = volumeInfo.publisher,
+                     average_rating = volumeInfo.averageRating,
+                     description = volumeInfo.description) %>%
+              mutate(published_date = as.Date(published_date))
+
+mini_data <- mini_data %>%
+  arrange(page_count)
+
+mini_data %>%
+  knitr::kable()
+```
+
+### Mutating new variables
+
+```{r}
+mutated_data <- mini_data %>%
+  mutate(year_published = str_sub(published_date, 1, 4) %>% as.numeric(),
+         month_published = str_sub(published_date, 6, 7) %>% as.numeric(),
+         day_published = str_sub(published_date, 9, 10) %>% as.numeric(),
+         title_length = nchar(book_title))
+
+mutated_data %>% knitr::kable()
+```
+
+### Producing summaries
+
+```{r}
+summarised_data <- mutated_data %>% 
+  mutate(long_book = ifelse(page_count > mean(page_count, na.rm = TRUE), "Yes", "No"))
+
+summarised_data %>%
+  group_by(long_book) %>%
+  summarise(num_books = n()) %>%
+  knitr::kable()
+
+#Looks like most of the Harry Potter books wouldn't take long to read. Yay!
+```
+
+## Board game data
+
+### Familiarising yourself with the fields/columns of the `boardgames` table
+
+```{r}
+dbListFields(db_connection, "boardgames")[1:25]
+```
+
+### Writing a SQL query
+
+```{sql connection = db_connection, output.var = "board_game_data"}
+SELECT `details.name` AS game_name, `details.yearpublished` AS year_published, `details.minplayers` AS minimum_players, `details.minplaytime` AS minimum_playtime, (date('now') - `details.yearpublished`) AS years_since_published
+  FROM boardgames
+  WHERE game_name LIKE '%Harry Potter%' AND
+        years_since_published > 5
+  ORDER BY year_published DESC
+  LIMIT 40
+```
+
+```{r}
+board_game_data %>% knitr::kable()
+```
+
+## Your choice!
+
+```{r}
+board_game_data %>% ggplot() +
+  geom_histogram(aes(x=year_published), fill = "#6a0dad") +
+  labs(title = "Harry Potter board games across years",
+       subtitle = "Analysing when Harry Potter board games were most/least produced.",
+       caption = "Source: Board Game Geek",
+       x = "Year Published",
+       y = "Games Total")
+```
+
+```{css}
+@import url('https://fonts.googleapis.com/css2?family=Palette+Mosaic&family=Red+Hat+Mono:wght@300&family=Roboto:wght@300&display=swap');
+
+h2 {font-family: 'Red Hat Mono', monospace;}
+body {
+  font-family: 'Roboto', sans-serif;
+} 
+```
+
+
+I tried to visualise which years Harry Potter games were released the most and the least, and in doing that hoped to find out a correlation between Harry Potter movie release years and the board game years.  
+
+I believe I found such a correlation although my data doesn't contain any information about the release dates of the movies. For example, when the first couple Harry Potter movies came out (early 2000s), we observe a high number of board games being released, while after the last movie (released in 2011) almost no board games were released. That is until 2016, when *Harry Potter and the Cursed Child* book were released.   
+
+## Learning reflection
+
+I had never heard anything about JSON files until the Module 3 *Creating new variables and data tables*. I have learned that JSON files are a great and quite an intuitive way to store data. It was super easy to read and it was great to **learn to store multiple values in a column by nesting in JSON**. It is fairly different to work with them, though, so it was great to learn all about JSON files.  
+
+I am extremely excited about exploring further the nuts and bolts of *Grammar of Graphics* during the course of the rest of the semester. We have tried using *ggplots* to some extent but I know that *ggplot* is a limitless package and I am super excited to work with it again soon.

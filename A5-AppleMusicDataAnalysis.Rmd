@@ -1,0 +1,195 @@
+---
+title: "Assignment 5"
+author: "Nev Yildirim"
+date: "01/06/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, error = FALSE)
+library(tidyverse)
+library(ggplot2)
+library(gganimate)
+library(jsonlite)
+```
+
+## Introduction
+I have decided to create a data frame that I combined using the _Apple Music Top 100_ playlists from four different countries. These are **New Zealand**, **UK**, **USA**, **South Africa**. My purpose was to analyse the music trends in the English speaking world(common-wealth countries). Although I couldn't compare and contrast there countries' listening trends, I have found their most favourite artists.
+## Visualisation
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(gganimate)
+
+song_data <- readRDS("song_data.rds")
+
+song_data_separated <- song_data %>%
+  separate_rows(artistName, sep = ", | & " ) %>%
+  group_by(artistName) %>%
+  summarise(num_songs = n()) %>%
+  arrange(desc(num_songs)) %>%
+  filter(num_songs >= 10)
+
+song_data_separated %>% ggplot() +
+  geom_col(aes(y=artistName, x=num_songs), fill = "#6a0dad") +
+  labs(x = "Number of songs", y = "Artist name",
+       title ="Top artists in all 4 playlists",
+       subtitle = "Who are the most favourite artists in all these 4 countries?",
+       caption = "Source: Apple Music") +
+  theme(axis.text.y = element_text(angle = 45)) +
+  theme(panel.background = element_rect(fill =
+                                          "white"))
+
+```
+
+
+In this data analysis, I am trying to figure out the artist names who are being listened to to a larger extent than most other artists in each of the playlists of each country. In addition to that, I have filtered the data in a way that we can only look at the artists who have more than 10 songs in these playlists. As a result, we can clearly observe that **Harry Styles** seems to be the most favourite artist at this stage, with a total of over approximately 60 songs in all the four playlists.  
+
+## Data creation
+
+## Final reflection
+I had been looking for Module 5 since the day STATS220 started, as I was always curious about web scraping. Web scraping was such a topic that both intrigued me and made me nervous. Inspecting web pages and _borrowing_ information from them sounded absolutely incredible and promising, but when I saw the confusing and lengthy HTML code, I felt uncomfortable when I first came across **web scraping**. However, after Module 5, I realised there is a patter to things and when I figure out that pattern, specifically to be able to know which part of the HTML code you're wanting to scrape, things get much easier. 
+
+Overall, I am looking forward to working with SQL more, maybe take my knowledge and look into the design aspects of SQL databases and join data using my R knowledge.
+
+## Code appendix
+
+```{r file='data_web.R', eval=FALSE}
+library(tidyverse)
+library(rvest)
+library(jsonlite)
+library(gganimate)
+
+urls <- c("https://music.apple.com/us/playlist/top-100-new-%20zealand/pl.d8742df90f43402ba5e708eefd6d949a",
+          "https://music.apple.com/us/playlist/top-100-uk/pl.c2273b7e89b44121b3093f67228918e7",
+          "https://music.apple.com/us/playlist/top-100-usa/pl.606afcbb70264d2eb2b51d8dbcfa6a12",
+          "https://music.apple.com/za/playlist/top-100-south-africa/pl.447bd05172824b89bd745628f7f54c18")
+
+apple_data <- map_df(1 : length(urls), function(i){
+  
+  # taking two seconds break
+  Sys.sleep(2)
+  page <- read_html(urls[i])
+  
+  trackId <- page %>%
+    html_elements(".songs-list") %>%
+    html_elements("a") %>%
+    html_attr("href") %>%
+    .[str_detect(.,"song")] %>%
+    str_remove_all("https://music.apple.com/us/song/") %>%
+    parse_number()
+  
+  track_name <- page %>%
+    html_elements(".songs-list-row__song-name") %>%
+    html_text2()
+  
+  track_length <- page %>%
+    html_elements(".songs-list-row__length") %>%
+    html_text2()
+  
+  track_length_min <- 
+    60 * str_sub(track_length, 1, 1) %>% parse_number()
+  
+  track_length_secs <- 
+    str_sub(track_length, 3, 4) %>% parse_number()
+  
+  track_length_total <- track_length_min + track_length_secs
+  
+  
+  return(tibble(trackId, track_name, track_length_total))
+})
+
+apple_data
+
+saveRDS(apple_data, "apple_data.rds")
+
+```
+
+```{r file='data_api.R', eval=FALSE}
+library(tidyverse)
+library(jsonlite)
+readRDS("apple_data.rds")
+
+trackIds <- apple_data$trackId %>% unique() %>% na.omit() %>% parse_number()
+trackIds
+
+itunes_data <- map_df(1 : length(trackIds), function(i){
+  Sys.sleep(2)
+  song_id <- trackIds[i]
+  url <- paste0("https://itunes.apple.com/lookup?id=", song_id)
+  response <- fromJSON(url)
+  itunes_data <- response$results
+})
+
+saveRDS(itunes_data, "itunes_data.rds")
+
+
+```
+
+```{r file='data_join.R', eval=FALSE}
+library(tidyverse)
+apple_data <- readRDS("apple_data.rds")
+itunes_data <- readRDS("itunes_data.rds")
+song_data <- inner_join(apple_data, itunes_data, by = 'trackId')
+saveRDS(song_data, "song_data.rds")
+
+```
+
+```{r file='data_viz.R', eval=FALSE}
+library(tidyverse)
+library(ggplot2)
+song_data <- readRDS("song_data.rds")
+
+song_data_separated <- song_data %>%
+  separate_rows(artistName, sep = ", | & " ) %>%
+  group_by(artistName) %>%
+  summarise(num_songs = n()) %>%
+  arrange(desc(num_songs)) %>%
+  filter(num_songs >= 10)
+
+song_data_separated %>% ggplot() +
+  geom_col(aes(y=artistName, x=num_songs), fill = "#6a0dad") +
+  labs(x = "Number of songs", y = "Artist name",
+       title ="Top artists in all 4 playlists",
+       subtitle = "Who are the most favourite artists in all these 4 countries?",
+       caption = "Source: Apple Music") +
+  theme(axis.text.y = element_text(angle = 45)) +
+  theme(panel.background = element_rect(fill =
+                                          "white"))
+```
+
+```{r file='data_creativity.R', eval=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(gganimate)
+
+song_data <- readRDS("song_data.rds")
+
+song_data_separated <- song_data %>%
+  separate_rows(artistName, sep = ", | & " ) %>%
+  group_by(artistName) %>%
+  summarise(num_songs = n()) %>%
+  arrange(desc(num_songs)) %>%
+  filter(num_songs >= 10)
+
+song_data_separated %>% ggplot() +
+  geom_col(aes(y=artistName, x=num_songs), fill = "#6a0dad") +
+  labs(x = "Number of songs", y = "Artist name",
+       title ="Top artists in all 4 playlists",
+       subtitle = "Who are the most favourite artists in all these 4 countries?",
+       caption = "Source: Apple Music") +
+  theme(axis.text.y = element_text(angle = 45)) +
+  theme(panel.background = element_rect(fill =
+                                          "white"))
+```
+
+```{css}
+@import url('https://fonts.googleapis.com/css2?family=Palette+Mosaic&family=Red+Hat+Mono:wght@300&family=Roboto:wght@300&display=swap');
+
+h2 {font-family: 'Red Hat Mono', monospace;}
+body {
+  font-family: 'Roboto', sans-serif;
+} 
+```
+

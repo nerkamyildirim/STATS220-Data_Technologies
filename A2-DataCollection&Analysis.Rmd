@@ -1,0 +1,103 @@
+---
+title: "Assignment 2"
+subtitle: "STATS 220 Semester One 2022"
+author: "Nev Yildirim"
+date: "06/04/2022"
+output: 
+  html_document:
+    df_print: "paged"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+library(tidyverse)
+```
+
+## Introduction
+My intention throughout the data collection process was to draw insights into people's preferences regarding **online streaming services** and how those services shape their listening preferences/habits. As well as collecting information about their online music streaming habits, I have tried to deal with **how long they stream music for** and the **reasons behind why.**  
+
+
+## Links to form and data
+You can find the survey link [here,](https://forms.gle/kBJWe8oZZ3adrbmQ6)
+and the answers formatted in a .csv file [here.](https://docs.google.com/spreadsheets/d/e/2PACX-1vRoHCBhCncj11EUURaw068-dlE7XP_pADKUH0bTgSDW5P9EU-0fBK6F_DG_ovhv4_3NUS9AIPVwkQnx/pub?gid=1404465620&single=true&output=csv)  
+
+
+## Analytics
+```{r}
+csv_file <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vRoHCBhCncj11EUURaw068-dlE7XP_pADKUH0bTgSDW5P9EU-0fBK6F_DG_ovhv4_3NUS9AIPVwkQnx/pub?gid=1404465620&single=true&output=csv"
+music_data <- read_csv(csv_file) %>% 
+  rename(timestamp = 1,
+         duration_per_day = 2,
+         downloads_per_day = 3,
+         streaming_platform = 4,
+         reason = 5,
+         listening_daily = 6,
+         pay_for_music = 7)
+
+music_data %>%
+  slice(1:5) %>%
+  knitr::kable()
+```
+
+About the data frame, we can make observation such as the number of columns is `r ncol(music_data)` and number of rows is `r nrow(music_data)`.  
+
+We can also see that most of the data in our data frame are _'character'_ type: **`r sapply(music_data, typeof)`**
+
+```{r}
+duration_plot <- ggplot(data = music_data) +
+                  geom_bar(aes(x=duration_per_day), fill = "#6a0dad") +
+                  labs(title = "Hours spent(daily) on listening to music",
+       subtitle = "Analysizing people's music listening habits",
+       caption = "From survey data",
+       x = "Hours per day",
+       y = "Number of people")
+duration_plot
+``` 
+  
+  We can observe that most people list to **1 hour of music every day**.
+```{r}
+download_plot <- ggplot(data = music_data) +
+                  geom_bar(aes(x = downloads_per_day), fill = "#6a0dad") +
+                  labs(title = "Do people still download music?",
+       subtitle = "Analysizing people's music downloading habits",
+       caption = "From survey data",
+       x = "Number of downloads",
+       y = "Number of people")
+download_plot
+```
+  
+  The answer to the question *Do people still download music?* seems to be clear. Most people don't download any music any more. We have two points that we presume are outliers. (or in other words my friends' way of making fun of my assignment :)
+  
+```{r}
+music_data_longer <- music_data %>%
+  separate_rows(streaming_platform, sep = ", ")
+
+streaming_services_plot <- ggplot(data = music_data_longer) +
+                  geom_bar(aes(y = streaming_platform), fill = "#6a0dad") +
+                  labs(title = "Most popular streaming services",
+       subtitle = "Analysizing popularity of streaming services",
+       caption = "From survey data",
+       x = "Number of people",
+       y = "Streaming services")
+
+streaming_services_plot
+```
+
+```{css}
+@import url('https://fonts.googleapis.com/css2?family=Palette+Mosaic&family=Red+Hat+Mono:wght@300&family=Roboto:wght@300&display=swap');
+
+h2 {font-family: 'Red Hat Mono', monospace;}
+body {
+  font-family: 'Roboto', sans-serif;
+} 
+```
+  
+  It is obvious that YouTube/YouTube Music is the where most people go to to listen to music. YouTube seems definitely to be a big menace to not only traditional TV but traditional radio, as well.
+  
+## Learning reflection
+
+I have thoroughly enjoyed this assignment mainly due to the fact that I now understand it is very easy to collect data and do some preliminary data analysis using Google Forms and R. Not only that, but being able to do this while adding new data is incredibly useful. I finally felt I was actually doing something related to Data Science, away from all the theory. 
+
+Though very simple, I tried to make use of indenting and assigning variables to make the code much clearer and more readable, both of which I also used in Assignment 1.  
+
+I am looking forward to working and querying information with SQL and relational database management systems (RDBMS).

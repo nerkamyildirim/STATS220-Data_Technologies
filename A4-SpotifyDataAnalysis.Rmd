@@ -1,0 +1,108 @@
+---
+title: "Assignment 4"
+author: "Nev Yildirim"
+date: "17/05/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, error = FALSE)
+library(tidyverse)
+library(ggplot2)
+library(gganimate)
+library(jsonlite)
+```
+
+## Introduction
+
+It's extremely exciting to analyse Spotify data! I've decided to analyse the Shazam playlist that Spotify created for me hoping it will give the most accurate insight into my taste in music. 
+
+I'd like to firstly figure out if I have favourite artists I listen to the most. Then I plan to have a look at the evolution of songs in terms of their energy level contrasted with their popularity scores.
+
+```{r}
+# reading the playlist data from working directory
+spotify_data <- fromJSON("/Users/nevyildirim/Desktop/Stats220/Stats220/Assignment4/spotify.json")
+
+#doing preliminary analysis of the data
+spotify_data %>% glimpse()
+head(spotify_data)
+```
+We observe the data consists of **60 rows** (or _60 songs_) and **23 columns**. 
+
+## Visualisation 1 - Favourite Artists
+
+Firstly I'd like to look into artists in the playlist. **Is there any specific artist/artists that I listen to more than others?**
+
+Some of the cells have multiple values for _**artist_name**_ column. We'll need to separate them into atomic cells.
+
+```{r}
+# separating artists in a new data frame, counting songs by each artist and sorting
+# from highest to lowest 
+separated_spotify_data <- spotify_data %>% 
+  separate_rows(artist_name, sep = ", ") %>%
+  group_by(artist_name) %>%
+  summarise(num_songs = n()) %>%
+  arrange(desc(num_songs)) %>%
+  filter(num_songs >= 2)
+
+# plotting the result on a bar chart
+separated_spotify_data %>% ggplot() +
+  geom_col(aes(y=artist_name, x=num_songs), fill = "#6a0dad") +
+  labs(x = "Number of songs", y = "Artist name",
+       title ="Do I prefer any specific artist to others?",
+       subtitle = "Let's find out if I tend to listen to more songs by a particular artist/artists",
+       caption = "Source: Spotify data") +
+  theme(axis.text.y = element_text(angle = 45))
+```
+
+I have filtered the data to artists who appears at least twice on the playlist. Turns out, I _do_ have favourite artists. Interesting! 
+
+## Visualisation 2 - Track Popularity and Energy over the years
+
+In the next analysis, I'd like to look into the relationship between _**track popularity**_ and _**energy**_ values of tracks and what the trend looks like over the years. 
+
+```{r}
+# creating a new date variable to look into years
+# and sorting the years ascending
+spotify_data <- spotify_data %>%
+  mutate(year_published = str_sub(release_date, 1, 4) %>% as.numeric()) %>%
+  arrange(year_published)
+
+new_plot <- ggplot(spotify_data, 
+  aes(x = track_popularity, y=energy, size = tempo, colour = track_id)) +
+  geom_point(show.legend = FALSE, alpha = 0.7) +
+  labs(x = "Track Popularity",
+       y = "Energy",
+       title ="Track popularity vs. Energy over the years",
+       subtitle = "Let's find out the trend between track popularity and enegy over the years",
+       caption = "Source: Spotify data") +
+  transition_reveal(year_published)
+  
+new_plot
+```
+
+We observe that there is a positive correlation between _**track popularity**_ and _**energy**_ values of the songs and newer songs appear to be more popular and energetic. Good time to be alive!
+
+## Reflection
+
+Like everyone else, I love music, too. I love listening to music, I love dancing to it and I love making it as much as I can by playing my piano. So, for me, I think the hardest part of this assignment was to pick a playlist to carry out my analysis on. 
+
+While I was looking through my Spotify profile, I came across my playlist that Spotify itself created for me that consists of the songs I discovered using my Shazam app. In other words, this playlist includes the songs that I liked listening to but didn't know the names of or completely new songs that I hadn't heard before and wanted to discover and listen more later. 
+
+What this means is that these songs are really the cherry-on-top songs for me that I took the time to open the app and tried to get to know them because I liked them very much. Therefore, I believe this playlist is the best playlist to give me the most insightful information regarding my music taste.
+
+With my first visualisation, what I hoped to find out was the answers to very hard questions like **is there a specific artist that I listen to the most** or what genre do I listen to the most or do I enjoy listening to sad songs or happy songs more, etc. 
+
+In my second visualisation, I was more curious to figure out how songs have evolved over the years, particularly with respect to their _**track popularity**_ and _**energy**_ scores.
+
+Overall, it has been quite and interesting assignment for me. I loved to play around with **gganimate**. It wasn't super easy, but it was a lot of fun. Of course, grammar of graphics is an ocean, and I realise I am playing in the shallow waters at the moment. However, I think we've made an incredible start and I'm looking forward to challenges ahead, especially scraping data from the web!
+
+```{css}
+@import url('https://fonts.googleapis.com/css2?family=Palette+Mosaic&family=Red+Hat+Mono:wght@300&family=Roboto:wght@300&display=swap');
+
+h2 {font-family: 'Red Hat Mono', monospace;}
+body {
+  font-family: 'Roboto', sans-serif;
+} 
+```
+
