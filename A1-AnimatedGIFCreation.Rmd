@@ -1,0 +1,55 @@
+---
+title: "Assignment 1"
+subtitle: "STATS 220 Semester One 2022"
+author: "Nev Yildirim"
+date: "21/03/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+library(magick)
+```
+
+## GitHub repository information
+* Please visit [my STATS220 repo](https://github.com/neverkam/stats220) to find the incredible work we do in STATS220 - Data Technologies paper. 
+
+## Animated GIF creation
+```{r}
+gif_image <- image_read("https://st2.depositphotos.com/1173077/8707/v/950/depositphotos_87073942-stock-illustration-boo-ghost-cartoon.jpg") %>% image_scale(500)
+
+frame_1 <- gif_image %>%
+  image_scale(200) %>%
+  image_extent("500x500")
+
+frame_2 <- gif_image %>%
+  image_scale(300) %>%
+  image_extent("500x500")
+
+frame_3 <- gif_image %>%
+  image_scale(400) %>%
+  image_extent("500x500")
+
+frame_4 <- gif_image %>%
+  image_scale(500) 
+
+# putting the frames in a vector and creating an animation
+gif <- c(frame_1, frame_2, frame_3, frame_4) %>% image_animate(fps = 1)
+gif
+
+```
+```{css}
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100&family=Palette+Mosaic&display=swap');
+
+h2 {font-family: 'Red Hat Mono', monospace;}
+body {
+  font-family: 'Montserrat', sans-serif;
+} 
+```
+
+## Learning reflection
+What a start to the year! I love the fact that I could not only create memes but also moving memes (in other words gifs) and I love how simple it actually was when taught properly. I was always uncertain about how to use vectos in R. In these past two weeks, that uncertainty was taken care of and I am much more comfortable with vector operations now. 
+
+As I was confused about vectors, I was also quite confused about data frames. So I am definitely looking forward to working with data frames.
+
+
